@@ -1,0 +1,34 @@
+# To reproduce the figures in the main paper, follow these steps:
+
+# Package installation:
+conda create -n "PSD_3p11" python==3.11
+conda activate PSD_3p11
+set SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+pip install numpy==1.23.5
+pip install git+https://github.com/wittawatj/kernel-gof.git
+pip install autograd seaborn scikit-learn matplotlib
+pip install pyparsing six pytz future
+conda deactivate
+
+# Reproducing the main paper results
+# Edit the sys.path.append lines to the PSD folder near the tops of the scripts/ files
+# Run (from the PSD working directory):
+conda activate PSD_3p11
+python scripts/run_gof_experiment.py 'null'
+python scripts/run_gof_experiment.py 'variance_perturb'
+python scripts/run_gof_experiment.py 'student-t'
+python scripts/run_gof_experiment.py 'laplace'
+python scripts/run_gof_experiment.py 'rbm'
+python scripts/run_quality_measure_experiment.py
+python scripts/run_speed_experiment.py
+conda deactivate
+
+# Reproducing the appendices results
+# Edit the sys.path.append lines to the PSD folder near the tops of the scripts/ files
+# Run (from the PSD working directory):
+conda activate PSD_3p11
+python scripts/run_gof_experiment_asymptotic.py 'null'
+python scripts/run_gof_experiment_asymptotic.py 'variance_perturb'
+python scripts/run_gof_experiment_asymptotic.py 'student-t'
+python scripts/run_gof_experiment_asymptotic.py 'laplace'
+conda deactivate

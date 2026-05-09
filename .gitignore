@@ -1,0 +1,17 @@
+# Python bytecode caches
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS metadata
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+
+# Build artefacts
+build/
+dist/
+*.egg-info/
