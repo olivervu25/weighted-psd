@@ -1,6 +1,10 @@
-# To reproduce the figures in the main paper, follow these steps:
+# weighted-psd — reproduction instructions
+# =========================================
+# Reproduces the main paper figures from the merged experiment pipeline.
 
-# Package installation:
+# ---------------------------------------------------------------------------
+# 1. Environment setup
+# ---------------------------------------------------------------------------
 conda create -n "PSD_3p11" python==3.11
 conda activate PSD_3p11
 set SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
@@ -8,27 +12,60 @@ pip install numpy==1.23.5
 pip install git+https://github.com/wittawatj/kernel-gof.git
 pip install autograd seaborn scikit-learn matplotlib
 pip install pyparsing six pytz future
-conda deactivate
 
-# Reproducing the main paper results
-# Edit the sys.path.append lines to the PSD folder near the tops of the scripts/ files
-# Run (from the PSD working directory):
-conda activate PSD_3p11
-python scripts/run_gof_experiment.py 'null'
-python scripts/run_gof_experiment.py 'variance_perturb'
-python scripts/run_gof_experiment.py 'student-t'
-python scripts/run_gof_experiment.py 'laplace'
-python scripts/run_gof_experiment.py 'rbm'
-python scripts/run_quality_measure_experiment.py
-python scripts/run_speed_experiment.py
-conda deactivate
+# ---------------------------------------------------------------------------
+# 2. Quick path: re-render figures from the cached results in this repo
+# ---------------------------------------------------------------------------
+# The results/ directory ships with the cached pickles + CSVs from a full
+# sweep, so the four figures can be regenerated in a few seconds without
+# re-running anything expensive.
 
-# Reproducing the appendices results
-# Edit the sys.path.append lines to the PSD folder near the tops of the scripts/ files
-# Run (from the PSD working directory):
-conda activate PSD_3p11
-python scripts/run_gof_experiment_asymptotic.py 'null'
-python scripts/run_gof_experiment_asymptotic.py 'variance_perturb'
-python scripts/run_gof_experiment_asymptotic.py 'student-t'
-python scripts/run_gof_experiment_asymptotic.py 'laplace'
+python scripts/plot_popular_methods_merged.py
+# -> results/figure_popular_methods_merged.png
+
+python scripts/plot_psd_vs_wpsd_merged.py
+# -> results/figure_psd_vs_wpsd_merged.png
+
+# Runtime figures (Figures 3 and 4) are produced by the runtime runner;
+# it auto-loads the cache under results/runtime/ and only redraws the PNGs:
+python scripts/run_runtime_experiment.py
+# -> results/figure_runtime_vs_d.png   (paper Figure 3)
+# -> results/figure_runtime_vs_n.png   (paper Figure 4)
+
+# ---------------------------------------------------------------------------
+# 3. Full path: re-run every experiment from scratch
+# ---------------------------------------------------------------------------
+# Use this if you want to verify the cached results or sweep new
+# parameters. Add --force to ignore the on-disk caches.
+
+# 3a. Main sweep (~3-5 hours). Produces PSD/lambda-PSD L=0..4 plus IMQ KSD,
+#     Gauss KSD, Gauss FSSD-opt across {Standard Gaussian, Perturbed
+#     Gaussian, Student-t, Laplace} x d in {2,4,8,16,32,64,128} with 100 reps.
+#     Same X feeds all tests, so lambda-PSD lines on both downstream
+#     figures are identical.
+python scripts/run_merged_experiment.py
+
+# 3b. RFSD overlay (~15-20 min). Reuses the seeds from step 3a so X is
+#     bit-identical, then writes rfsd_*.pkl alongside the merged caches.
+#     Optional: only needed if you want the RFSD line on the popular-methods
+#     figure.
+python scripts/run_rfsd_experiment.py
+
+# 3c. Runtime sweeps (~10 min). Independent of 3a/3b.
+python scripts/run_runtime_experiment.py
+
+# 3d. Re-render the figures from the freshly-written caches:
+python scripts/plot_popular_methods_merged.py
+python scripts/plot_psd_vs_wpsd_merged.py
+
+# ---------------------------------------------------------------------------
+# 4. Common flags
+# ---------------------------------------------------------------------------
+# --force           ignore cached pickles and re-run
+# --n_reps N        change number of repetitions (default 100; runtime: 20)
+# --d_list 2,8,32   restrict the dimension sweep
+# --q_list 0,2,4    restrict the polynomial-order list
+# --cache_dir DIR   override results/merged or results/runtime
+# --no_errorbars    plot scripts only: line-only figures
+
 conda deactivate
