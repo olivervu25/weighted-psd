@@ -19,8 +19,8 @@ Sweeps
   d         : 2, 4, 8, 16, 32, 64, 128
   L (== Q)  : 0, 1, 2, 3, 4
   reps      : 100  (configurable via --n_reps)
-  n         : 1000  (Student-t panel uses 2000, matching the convention in
-                     run_gof_experiment.py and run_psd_vs_wpsd_all.py)
+  n         : 1000  (Student-t panel uses 2000, matching the original
+                     popular-methods + PSD-vs-wPSD conventions)
   alpha     : 0.05
 
 Reproducibility
